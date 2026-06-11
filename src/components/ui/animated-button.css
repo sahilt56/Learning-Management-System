@@ -1,0 +1,94 @@
+.animated-button-wrapper {
+  display: inline-block;
+}
+
+.animated-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--btn-padding, 16px 36px);
+  border: 4px solid;
+  border-color: transparent;
+  font-size: var(--btn-font-size, 16px);
+  background-color: inherit;
+  border-radius: 100px;
+  font-weight: 600;
+  color: var(--btn-color, rgb(255, 255, 255));
+  box-shadow: 0 0 0 2px var(--btn-border-color, var(--btn-color, rgb(255, 255, 255)));
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  text-decoration: none;
+  width: 100%;
+}
+
+.animated-button svg {
+  position: absolute;
+  width: 24px;
+  fill: var(--btn-color, rgb(255, 255, 255));
+  z-index: 9;
+  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.animated-button .arr-1 {
+  right: 16px;
+}
+
+.animated-button .arr-2 {
+  left: -25%;
+}
+
+.animated-button .circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background-color: var(--btn-hover-bg, var(--btn-color, rgb(255, 255, 255)));
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.animated-button .text {
+  position: relative;
+  z-index: 1;
+  transform: translateX(-12px);
+  transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.animated-button:hover {
+  box-shadow: 0 0 0 12px transparent;
+  color: var(--btn-hover-text, #212121);
+  border-radius: 100px;
+}
+
+.animated-button:hover .arr-1 {
+  right: -25%;
+}
+
+.animated-button:hover .arr-2 {
+  left: 16px;
+}
+
+.animated-button:hover .text {
+  transform: translateX(12px);
+}
+
+.animated-button:hover svg {
+  fill: var(--btn-hover-text, #212121);
+}
+
+.animated-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 0 0 4px var(--btn-border-color, var(--btn-color, rgb(7, 7, 7)));
+}
+
+.animated-button:hover .circle {
+  width: 1200px;
+  height: 1200px;
+  opacity: 1;
+}
