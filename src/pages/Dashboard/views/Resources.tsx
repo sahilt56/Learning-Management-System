@@ -2,18 +2,8 @@ import React from 'react';
 import { FileText, FileVideo, FileArchive, Download, Folder } from 'lucide-react';
 
 export default function Resources() {
-  const folders = [
-    { name: "Course Textbooks", count: 12, color: "bg-blue-100", border: "border-blue-400" },
-    { name: "Lecture Recordings", count: 45, color: "bg-red-100", border: "border-red-400" },
-    { name: "UI Templates", count: 8, color: "bg-purple-100", border: "border-purple-400" },
-  ];
-
-  const files = [
-    { name: "React_Architecture_Guide.pdf", type: "pdf", size: "2.4 MB", icon: <FileText className="w-8 h-8 text-red-500" /> },
-    { name: "Week_4_Zoom_Recording.mp4", type: "video", size: "245 MB", icon: <FileVideo className="w-8 h-8 text-blue-500" /> },
-    { name: "Figma_Wireframe_Kit.zip", type: "zip", size: "18 MB", icon: <FileArchive className="w-8 h-8 text-yellow-500" /> },
-    { name: "Marketing_Case_Studies.pdf", type: "pdf", size: "5.1 MB", icon: <FileText className="w-8 h-8 text-red-500" /> },
-  ];
+  const folders: any[] = [];
+  const files: any[] = [];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

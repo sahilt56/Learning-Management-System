@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sparkles } from "lucide-react";
 import React from "react";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 // Using the same cartoon characters and animations
 interface PupilProps {
@@ -214,12 +216,15 @@ export default function ForgotPasswordPage() {
     setError("");
     setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    if (email) {
+    try {
+      if (!email) {
+        throw new Error("Please enter a valid email.");
+      }
+      await sendPasswordResetEmail(auth, email);
       setIsSuccess(true);
-    } else {
-      setError("Please enter a valid email.");
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Failed to send password reset email.");
     }
 
     setIsLoading(false);

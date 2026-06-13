@@ -135,9 +135,9 @@ export const Header = ({
 }) => {
   const defaultTitle = (
     <>
-      Unlock Your Potential with{" "}
-      <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-        Eduverse
+      Your All-in-One Learning Ecosystem{" "}
+      <span className="text-blue-400 font-condiment font-normal lowercase text-5xl md:text-8xl align-middle inline-block mt-2 md:mt-0">
+        eduverse
       </span>
     </>
   );
@@ -152,7 +152,7 @@ export const Header = ({
       </h1>
       <p className="max-w-2xl text-sm md:text-xl text-slate-300">
         {description ||
-          "Explore a wide range of world-class courses designed by professionals to boost your career. Learn coding, design, business, data science, and more."}
+          "Join interactive classrooms, attend live sessions, manage assignments, and master new skills with our comprehensive learning management system."}
       </p>
 
       {showCTAs && (

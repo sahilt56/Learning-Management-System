@@ -18,12 +18,8 @@ export default function AboutSection() {
 
       <div className="relative max-w-[1831px] mx-auto px-4 sm:px-6 md:px-8 py-16 sm:py-20 md:py-24 z-10">
         <div className="flex flex-col lg:flex-row justify-between items-start gap-8 lg:gap-12 mb-12 sm:mb-16 md:mb-20">
-          <h2 className="font-grotesk text-[32px] sm:text-[48px] md:text-[60px] font-normal uppercase leading-[1.05] sm:leading-[1] md:leading-[1] text-cream relative">
-            Welcome!<br />
-            To
-            <span className="font-condiment text-[36px] sm:text-[52px] md:text-[68px] font-normal normal-case text-neon mix-blend-exclusion leading-[0.79] tracking-[0.03em] absolute right-[-8px] bottom-[-20px] sm:bottom-[-30px] md:bottom-[-40px] -rotate-1 opacity-90">
-              Eduverse
-            </span>
+          <h2 className="font-grotesk text-[32px] sm:text-[48px] md:text-[60px] font-normal uppercase leading-[1.05] sm:leading-[1] md:leading-[1] text-cream">
+            Welcome to <span className="font-condiment normal-case text-blue-400">Eduverse</span>
           </h2>
           <div className="flex flex-col gap-6 max-w-[320px] md:max-w-[400px]">
             <p className="font-mono text-[14px] sm:text-[15px] md:text-[16px] uppercase text-cream leading-relaxed">

@@ -1,7 +1,18 @@
-import React from 'react';
-import { GraduationCap, Search, Bell, Mail } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { GraduationCap, Search, Bell, Mail, Clock as ClockIcon } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function WelcomeBanner() {
+  const { dbUser } = useAuth();
+  const userName = dbUser?.name || 'Student';
+  
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  
   return (
     <div className="space-y-6">
       {/* Top Header Row */}
@@ -26,11 +37,11 @@ export default function WelcomeBanner() {
           </div>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full border-2 border-black overflow-hidden bg-yellow-400">
-              <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Sahil" alt="Profile" className="w-full h-full object-cover" />
+              <img src={dbUser?.profilePicture || `https://api.dicebear.com/7.x/notionists/svg?seed=${userName}`} alt="Profile" className="w-full h-full object-cover" />
             </div>
             <div className="hidden sm:block text-right leading-tight">
-              <div className="font-black text-sm">Sahil Patel</div>
-              <div className="text-xs font-bold text-gray-500">2nd year</div>
+              <div className="font-black text-sm">{userName}</div>
+              <div className="text-xs font-bold text-gray-500">{dbUser?.role || 'Student'}</div>
             </div>
           </div>
         </div>
@@ -39,9 +50,15 @@ export default function WelcomeBanner() {
       {/* Hero Banner */}
       <div className="bg-blue-600 border-4 border-black rounded-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center relative overflow-hidden text-white cursor-pointer hover:shadow-none hover:translate-x-[8px] hover:translate-y-[8px] transition-all">
         <div className="relative z-10">
-          <p className="font-bold text-blue-200 mb-4">April 30, Tuesday</p>
-          <h2 className="text-4xl font-black mb-2 tracking-tight">Welcome back, Sahil!</h2>
-          <p className="font-bold text-lg">You've finished <span className="text-yellow-300">85%</span> of your weekly goal!</p>
+          <div className="flex items-center gap-4 mb-4">
+            <p className="font-bold text-blue-200">{time.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'long' })}</p>
+            <div className="flex items-center gap-2 bg-black/20 px-3 py-1 rounded-full text-sm font-black tracking-widest border-2 border-black/30">
+              <ClockIcon className="w-4 h-4 text-blue-200" />
+              {time.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit', second: '2-digit' })}
+            </div>
+          </div>
+          <h2 className="text-4xl font-black mb-2 tracking-tight">Welcome back, {userName.split(' ')[0]}!</h2>
+          <p className="font-bold text-lg">Ready to conquer your goals today?</p>
         </div>
         <div className="hidden md:block relative z-10">
           <GraduationCap className="w-32 h-32 text-blue-200 drop-shadow-xl transform -rotate-12" />

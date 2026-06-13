@@ -1,4 +1,4 @@
-const admin = require('../config/firebase');
+const { auth } = require('../config/firebase');
 
 const verifyFirebaseToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -7,7 +7,10 @@ const verifyFirebaseToken = async (req, res, next) => {
     const idToken = authHeader.split(' ')[1];
 
     try {
-      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      if (!auth) {
+        throw new Error("Firebase Auth is not initialized.");
+      }
+      const decodedToken = await auth.verifyIdToken(idToken);
       req.user = decodedToken;
       next();
     } catch (error) {

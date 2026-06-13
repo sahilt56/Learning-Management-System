@@ -1,7 +1,68 @@
-import React from 'react';
-import { FileEdit, Send, Paperclip } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileEdit, Send, Paperclip, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function AssignmentCreator() {
+  const { token } = useAuth();
+  const [courses, setCourses] = useState<any[]>([]);
+  const [classrooms, setClassrooms] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Form State
+  const [targetId, setTargetId] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [title, setTitle] = useState('');
+  const [instructions, setInstructions] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!token) return;
+      try {
+        const [courseRes, classRes] = await Promise.all([
+          axios.get('http://localhost:5000/api/instructor/courses', { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get('http://localhost:5000/api/instructor/classrooms', { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        
+        setCourses(courseRes.data || []);
+        setClassrooms(classRes.data || []);
+
+        if (courseRes.data && courseRes.data.length > 0) {
+          setTargetId(`course_${courseRes.data[0]._id}`);
+        } else if (classRes.data && classRes.data.length > 0) {
+          setTargetId(`classroom_${classRes.data[0]._id}`);
+        }
+      } catch (error) {
+        console.error("Failed to fetch targets", error);
+      }
+    };
+    fetchData();
+  }, [token]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+    try {
+      setLoading(true);
+      const [type, id] = targetId.split('_');
+      const payload: any = { dueDate, title, instructions };
+      if (type === 'course') payload.courseId = id;
+      if (type === 'classroom') payload.classroomId = id;
+
+      await axios.post('http://localhost:5000/api/instructor/assignments', payload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert('Assignment Distributed Successfully!');
+      setTitle('');
+      setInstructions('');
+      setDueDate('');
+    } catch (error) {
+      console.error('Failed to create assignment', error);
+      alert('Failed to distribute assignment');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl">
       
@@ -15,29 +76,68 @@ export default function AssignmentCreator() {
           <FileEdit className="w-5 h-5 text-blue-600" /> New Assignment
         </h2>
         
-        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Course</label>
-              <select className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm bg-white">
-                <option>Advanced UI/UX Design</option>
-                <option>React for Beginners</option>
+              <label className="text-sm font-medium text-slate-700">Course / Classroom</label>
+              <select 
+                value={targetId}
+                onChange={(e) => setTargetId(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm bg-white"
+              >
+                {courses.length === 0 && classrooms.length === 0 && (
+                  <option value="">No targets found</option>
+                )}
+                {courses.length > 0 && (
+                  <optgroup label="Courses">
+                    {courses.map((c: any) => (
+                      <option key={`course_${c._id}`} value={`course_${c._id}`}>{c.title}</option>
+                    ))}
+                  </optgroup>
+                )}
+                {classrooms.length > 0 && (
+                  <optgroup label="Classrooms">
+                    {classrooms.map((c: any) => (
+                      <option key={`classroom_${c._id}`} value={`classroom_${c._id}`}>{c.name}</option>
+                    ))}
+                  </optgroup>
+                )}
               </select>
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-slate-700">Due Date</label>
-              <input type="datetime-local" className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" />
+              <input 
+                type="datetime-local" 
+                required
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
+              />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Assignment Title</label>
-            <input type="text" placeholder="e.g. Build a Todo App" className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" />
+            <input 
+              type="text" 
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Build a Todo App" 
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm" 
+            />
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-slate-700">Instructions</label>
-            <textarea rows={5} placeholder="Write detailed instructions here..." className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm resize-y" />
+            <textarea 
+              rows={5} 
+              required
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+              placeholder="Write detailed instructions here..." 
+              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all text-sm resize-y" 
+            />
           </div>
 
           <div className="space-y-1.5">
@@ -54,8 +154,9 @@ export default function AssignmentCreator() {
             <button type="button" className="px-6 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">
               Save Draft
             </button>
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 shadow-sm">
-              <Send className="w-4 h-4" /> Distribute Assignment
+            <button disabled={loading} type="submit" className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 shadow-sm">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Distribute Assignment
             </button>
           </div>
         </form>

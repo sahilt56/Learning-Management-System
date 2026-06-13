@@ -19,7 +19,19 @@ app.use(cors());
 
 // Mount routers
 const auth = require('./routes/auth');
+const dashboard = require('./routes/dashboardRoutes');
+const instructor = require('./routes/instructorRoutes');
+const courses = require('./routes/courseRoutes');
+
+const enroll = require('./routes/enrollmentRoutes');
+const admin = require('./routes/adminRoutes');
+
 app.use('/api/auth', auth);
+app.use('/api/dashboard', dashboard);
+app.use('/api/instructor', instructor);
+app.use('/api/courses', courses);
+app.use('/api/enroll', enroll);
+app.use('/api/admin', admin);
 
 const PORT = process.env.PORT || 5000;
 

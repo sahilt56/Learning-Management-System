@@ -3,19 +3,8 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { Award, Target, BookOpen } from 'lucide-react';
 
 export default function Performance() {
-  const data = [
-    { subject: 'React', score: 92 },
-    { subject: 'UI/UX', score: 85 },
-    { subject: 'Geography', score: 78 },
-    { subject: 'Communication', score: 88 },
-    { subject: 'Philosophy', score: 95 },
-  ];
-
-  const recentQuizzes = [
-    { title: "React State Management", score: "90%", status: "Pass", color: "bg-emerald-100" },
-    { title: "Figma Variables", score: "85%", status: "Pass", color: "bg-emerald-100" },
-    { title: "World Capitals", score: "60%", status: "Fail", color: "bg-red-100" },
-  ];
+  const data: any[] = [];
+  const recentQuizzes: any[] = [];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -30,21 +19,21 @@ export default function Performance() {
           <div className="p-3 bg-white border-2 border-black rounded-full"><Award className="w-8 h-8" /></div>
           <div>
             <p className="font-bold uppercase text-sm">Overall GPA</p>
-            <p className="text-3xl font-black">3.8 / 4.0</p>
+            <p className="text-3xl font-black">0.0 / 4.0</p>
           </div>
         </div>
         <div className="bg-blue-300 border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4 hover:-translate-y-1 transition-all">
           <div className="p-3 bg-white border-2 border-black rounded-full"><Target className="w-8 h-8" /></div>
           <div>
             <p className="font-bold uppercase text-sm">Attendance Rate</p>
-            <p className="text-3xl font-black">94%</p>
+            <p className="text-3xl font-black">0%</p>
           </div>
         </div>
         <div className="bg-purple-300 border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4 hover:-translate-y-1 transition-all">
           <div className="p-3 bg-white border-2 border-black rounded-full"><BookOpen className="w-8 h-8" /></div>
           <div>
             <p className="font-bold uppercase text-sm">Total XP Earned</p>
-            <p className="text-3xl font-black">12,450</p>
+            <p className="text-3xl font-black">0</p>
           </div>
         </div>
       </div>

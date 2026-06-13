@@ -244,7 +244,7 @@ export function CinematicFooter() {
         giantTextRef.current,
         { xPercent: isMobile ? -10 : 10, y: isMobile ? "0vh" : "10vh", scale: isMobile ? 1 : 0.8, opacity: 0 },
         {
-          xPercent: isMobile ? -55 : -50,
+          xPercent: isMobile ? -55 : 0,
           y: "0vh",
           scale: 1,
           opacity: 1,

@@ -29,12 +29,14 @@ interface PricingProps {
   plans: PricingPlan[];
   title?: string;
   description?: string;
+  onPlanSelect?: (plan: PricingPlan) => void;
 }
 
 export function Pricing({
   plans,
   title = "Simple, Transparent Pricing",
   description = "Choose the plan that works for you\nAll plans include access to our platform, lead generation tools, and dedicated support.",
+  onPlanSelect,
 }: PricingProps) {
   const [isMonthly, setIsMonthly] = useState(true);
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -145,23 +147,9 @@ export function Pricing({
               </p>
               <div className="mt-2 lg:mt-6 flex items-center justify-center gap-x-2">
                 <span className="text-4xl md:text-3xl lg:text-5xl font-bold tracking-tight text-white">
-                  <NumberFlow
-                    value={
-                      isMonthly ? Number(plan.price) : Number(plan.yearlyPrice)
-                    }
-                    format={{
-                      style: "currency",
-                      currency: "USD",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }}
-                    transformTiming={{
-                      duration: 500,
-                      easing: "ease-out",
-                    }}
-                    willChange
-                    className="font-variant-numeric tabular-nums"
-                  />
+                  <span className="font-variant-numeric tabular-nums">
+                    ${isMonthly ? plan.price : plan.yearlyPrice}
+                  </span>
                 </span>
                 {plan.period !== "Next 3 months" && (
                   <span className="text-sm font-semibold leading-6 tracking-wide text-slate-400">
@@ -183,15 +171,28 @@ export function Pricing({
                 ))}
               </ul>
 
-              <AnimatedButton
-                href={plan.href}
-                className={cn(
-                  "group relative w-full gap-2 md:gap-1 lg:gap-2 overflow-hidden text-base md:text-xs lg:text-lg font-semibold tracking-tighter !py-2.5 md:!py-1.5 lg:!py-3 !border-[2px] lg:!border-[4px]",
-                  "transform-gpu ring-offset-current transition-all duration-300 ease-out"
-                )}
-              >
-                {plan.buttonText}
-              </AnimatedButton>
+              {onPlanSelect ? (
+                <button
+                  type="button"
+                  onClick={() => onPlanSelect(plan)}
+                  className={cn(
+                    "group relative w-full gap-2 md:gap-1 lg:gap-2 overflow-hidden text-base md:text-xs lg:text-lg font-semibold tracking-tighter !py-2.5 md:!py-1.5 lg:!py-3 !border-[2px] lg:!border-[4px] rounded-full border-white/20 bg-white/10 text-white hover:bg-white/20",
+                    "transform-gpu ring-offset-current transition-all duration-300 ease-out"
+                  )}
+                >
+                  {plan.buttonText}
+                </button>
+              ) : (
+                <AnimatedButton
+                  href={plan.href}
+                  className={cn(
+                    "group relative w-full gap-2 md:gap-1 lg:gap-2 overflow-hidden text-base md:text-xs lg:text-lg font-semibold tracking-tighter !py-2.5 md:!py-1.5 lg:!py-3 !border-[2px] lg:!border-[4px]",
+                    "transform-gpu ring-offset-current transition-all duration-300 ease-out"
+                  )}
+                >
+                  {plan.buttonText}
+                </AnimatedButton>
+              )}
               <p className="mt-2 lg:mt-4 text-[10px] md:text-[9px] lg:text-xs leading-4 md:leading-3 lg:leading-5 text-slate-500">
                 {plan.description}
               </p>

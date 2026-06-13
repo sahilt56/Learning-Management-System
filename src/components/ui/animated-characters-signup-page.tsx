@@ -6,6 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Sparkles } from "lucide-react";
 import React from "react";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { PricingBasic } from "@/components/blocks/PricingBasic";
+import axios from "axios";
+import PaymentModal from "@/components/PaymentModal";
 
 // Using the same cartoon characters and animations
 interface PupilProps {
@@ -143,6 +150,12 @@ export default function SignupPage() {
   const [isLookingAtEachOther, setIsLookingAtEachOther] = useState(false);
   const [isPurplePeeking, setIsPurplePeeking] = useState(false);
   
+  // New auth flow state
+  const [role, setRole] = useState<'student' | 'instructor'>('student');
+  const [step, setStep] = useState<1 | 2>(1);
+  const [selectedPaidPlan, setSelectedPaidPlan] = useState<any>(null);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  
   const purpleRef = useRef<HTMLDivElement>(null);
   const blackRef = useRef<HTMLDivElement>(null);
   const yellowRef = useRef<HTMLDivElement>(null);
@@ -227,16 +240,97 @@ export default function SignupPage() {
   const yellowPos = calculatePosition(yellowRef);
   const orangePos = calculatePosition(orangeRef);
 
+  const navigate = useNavigate();
+  const { setDbUser } = useAuth();
+
+  const getPasswordStrength = (pass: string) => {
+    if (!pass) return { score: 0, text: '', color: 'bg-slate-700' };
+    let score = 0;
+    if (pass.length > 5) score += 1;
+    if (pass.length > 7) score += 1;
+    if (/[A-Z]/.test(pass) && /[a-z]/.test(pass)) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+    
+    if (score < 2) return { score: 1, text: 'Weak', color: 'bg-red-500', textColor: 'text-red-400' };
+    if (score < 4) return { score: 2, text: 'Medium', color: 'bg-yellow-500', textColor: 'text-yellow-400' };
+    return { score: 3, text: 'Strong', color: 'bg-green-500', textColor: 'text-green-400' };
+  };
+
+  const isNameValid = /^[a-zA-Z\s]{2,50}$/.test(name) || name === '';
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email === '';
+  const passStrength = getPasswordStrength(password);
+  const isFormValid = /^[a-zA-Z\s]{2,50}$/.test(name) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && password.length >= 6;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFormValid) return;
+    
+    if (role === 'instructor') {
+      setStep(2);
+    } else {
+      await handleSignupAndSync('none');
+    }
+  };
+
+  const handleSignupAndSync = async (selectedPlan: string = 'none') => {
     setError("");
     setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 800));
-    alert("Account created successfully!");
-    window.location.href = "/login";
+    try {
+      // 1. Create user in Firebase
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    setIsLoading(false);
+      // 2. Update Firebase profile
+      await updateProfile(user, { displayName: name });
+
+      // 3. Get token and force explicit backend sync with role and plan
+      const idToken = await user.getIdToken();
+      const syncRes = await axios.post('http://localhost:5000/api/auth/sync', {
+        role,
+        plan: selectedPlan
+      }, {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+
+      // 4. Update context BEFORE navigating so ProtectedRoute gets the correct role
+      setDbUser(syncRes.data.user);
+
+      // 5. Navigate based on actual role returned from backend
+      if (syncRes.data.user.role === 'instructor') {
+        navigate('/instructor');
+      } else if (syncRes.data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "An error occurred during sign up.");
+      setIsLoading(false);
+      setStep(1);
+    }
+  };
+
+  const handlePlanSelect = async (plan: any) => {
+    const price = parseFloat(plan.price);
+    if (price === 0) {
+      // Free plan → signup and directly go to dashboard
+      await handleSignupAndSync('free');
+    } else {
+      // Paid plan → show payment UI first, then signup on success
+      setSelectedPaidPlan(plan);
+      setShowPaymentForm(true);
+    }
+  };
+
+  const handlePaidPlanPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, you'd tokenize card details with Stripe/Razorpay here.
+    // For demo, we simulate a successful payment and then create the account.
+    const planType = parseFloat(selectedPaidPlan.price) === 49 ? 'pro' : 'enterprise';
+    await handleSignupAndSync(planType);
   };
 
   return (
@@ -373,91 +467,174 @@ export default function SignupPage() {
           <Sparkles className="size-4" /> Eduverse
         </a>
 
-        <div className="w-full max-w-[420px]">
-          <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Create an account</h1>
-            <p className="text-slate-400 text-sm">Join Eduverse to start your journey</p>
-          </div>
+        <div className="w-full max-w-[420px] lg:max-w-none lg:w-[420px]">
+          {step === 1 && (
+            <>
+              <div className="text-center mb-10">
+                <h1 className="text-3xl font-bold tracking-tight mb-2">Create an account</h1>
+                <p className="text-slate-400 text-sm">Join Eduverse to start your journey</p>
+              </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium text-slate-300">Full Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                autoComplete="off"
-                onChange={(e) => setName(e.target.value)}
-                onFocus={() => setIsTyping(true)}
-                onBlur={() => setIsTyping(false)}
-                required
-                className="h-12 rounded-xl bg-slate-900/50 backdrop-blur-sm border-slate-800/60 focus:bg-slate-900 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder:text-slate-500 transition-all"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-slate-300">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="anna@gmail.com"
-                value={email}
-                autoComplete="off"
-                onChange={(e) => setEmail(e.target.value)}
-                onFocus={() => setIsTyping(true)}
-                onBlur={() => setIsTyping(false)}
-                required
-                className="h-12 rounded-xl bg-slate-900/50 backdrop-blur-sm border-slate-800/60 focus:bg-slate-900 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder:text-slate-500 transition-all"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-slate-300">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="h-12 pr-10 rounded-xl bg-slate-900/50 backdrop-blur-sm border-slate-800/60 focus:bg-slate-900 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder:text-slate-500 transition-all"
-                />
+              {/* Role Toggle */}
+              <div className="flex bg-slate-900/50 p-1 rounded-xl mb-6 border border-slate-800">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  onClick={() => setRole('student')}
+                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                    role === 'student' 
+                      ? 'bg-indigo-600 text-white shadow-md' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
                 >
-                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  Student
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('instructor')}
+                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                    role === 'instructor' 
+                      ? 'bg-indigo-600 text-white shadow-md' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  }`}
+                >
+                  Instructor
                 </button>
               </div>
-            </div>
 
-            {error && (
-              <div className="p-3 text-sm text-red-400 bg-red-950/20 border border-red-900/30 rounded-lg">
-                {error}
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium text-slate-300">Full Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={name}
+                    autoComplete="off"
+                    onChange={(e) => setName(e.target.value)}
+                    onFocus={() => setIsTyping(true)}
+                    onBlur={() => setIsTyping(false)}
+                    required
+                    className={`h-12 rounded-xl bg-slate-900/50 backdrop-blur-sm focus:bg-slate-900 focus:ring-2 text-white placeholder:text-slate-500 transition-all ${
+                      name && !isNameValid ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-800/60 focus:border-indigo-500/50 focus:ring-indigo-500/20'
+                    }`}
+                  />
+                  {name && !isNameValid && <p className="text-xs text-red-400">Please enter a valid name (letters only, min 2 chars).</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium text-slate-300">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="anna@example.com"
+                    value={email}
+                    autoComplete="off"
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setIsTyping(true)}
+                    onBlur={() => setIsTyping(false)}
+                    required
+                    className={`h-12 rounded-xl bg-slate-900/50 backdrop-blur-sm focus:bg-slate-900 focus:ring-2 text-white placeholder:text-slate-500 transition-all ${
+                      email && !isEmailValid ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-800/60 focus:border-indigo-500/50 focus:ring-indigo-500/20'
+                    }`}
+                  />
+                  {email && !isEmailValid && <p className="text-xs text-red-400">Please enter a valid email address.</p>}
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="password" className="text-sm font-medium text-slate-300">Password</Label>
+                    {password && (
+                      <span className={`text-xs font-semibold ${passStrength.textColor}`}>
+                        {passStrength.text}
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="h-12 pr-10 rounded-xl bg-slate-900/50 backdrop-blur-sm border-slate-800/60 focus:bg-slate-900 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder:text-slate-500 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
+                    </button>
+                  </div>
+                  {password && (
+                    <div className="flex gap-1 mt-2">
+                      <div className={`h-1.5 flex-1 rounded-full ${passStrength.score >= 1 ? passStrength.color : 'bg-slate-700'}`} />
+                      <div className={`h-1.5 flex-1 rounded-full ${passStrength.score >= 2 ? passStrength.color : 'bg-slate-700'}`} />
+                      <div className={`h-1.5 flex-1 rounded-full ${passStrength.score >= 3 ? passStrength.color : 'bg-slate-700'}`} />
+                    </div>
+                  )}
+                  {password && password.length < 6 && <p className="text-xs text-red-400">Password must be at least 6 characters.</p>}
+                </div>
+
+                {error && (
+                  <div className="p-3 text-sm text-red-400 bg-red-950/20 border border-red-900/30 rounded-lg">
+                    {error}
+                  </div>
+                )}
+
+                <Button 
+                  type="submit" 
+                  className={`w-full h-12 text-base font-medium border-0 rounded-xl shadow-lg transition-all mt-4 ${
+                    isFormValid && !isLoading
+                      ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white shadow-indigo-500/25 hover:-translate-y-0.5' 
+                      : 'bg-slate-800 text-slate-500 cursor-not-allowed shadow-none'
+                  }`}
+                  size="lg" 
+                  disabled={isLoading || !isFormValid}
+                >
+                  {isLoading ? "Processing..." : (role === 'instructor' ? "Continue to Plans" : "Sign Up")}
+                </Button>
+              </form>
+
+              <div className="text-center text-sm text-slate-400 mt-8">
+                Already have an account?{" "}
+                <a href="/login" className="text-white font-medium hover:underline">
+                  Log in
+                </a>
               </div>
-            )}
-
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-base font-medium bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white border-0 rounded-xl shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5 mt-4" 
-              size="lg" 
-              disabled={isLoading}
-            >
-              {isLoading ? "Creating account..." : "Sign Up"}
-            </Button>
-          </form>
-
-          <div className="text-center text-sm text-slate-400 mt-8">
-            Already have an account?{" "}
-            <a href="/login" className="text-white font-medium hover:underline">
-              Log in
-            </a>
-          </div>
+            </>
+          )}
         </div>
       </div>
+
+        {/* Step 2: Pricing - Full Screen Overlay */}
+        {step === 2 && (
+          <div className="fixed inset-0 z-50 bg-slate-950 overflow-y-auto">
+            <div className="min-h-screen flex flex-col">
+              <div className="flex items-center justify-between px-6 pt-6 pb-2 max-w-6xl mx-auto w-full">
+                <Button variant="ghost" onClick={() => { setStep(1); setShowPaymentForm(false); }} className="text-slate-400 hover:text-white">
+                  ← Back to Details
+                </Button>
+                {isLoading && <span className="text-indigo-400 animate-pulse text-sm">Creating Account...</span>}
+              </div>
+
+              <div className="flex-1">
+                <PricingBasic onPlanSelect={handlePlanSelect} />
+              </div>
+              
+              <PaymentModal
+                isOpen={showPaymentForm}
+                onClose={() => setShowPaymentForm(false)}
+                plan={{ name: selectedPaidPlan?.name || '', price: selectedPaidPlan?.price || 0 }}
+                onPlanSubmit={handlePaidPlanPayment}
+                onPlanSuccess={() => navigate('/instructor')}
+                planLoading={isLoading}
+                planError={error}
+              />
+            </div>
+          </div>
+        )}
     </div>
   );
 }

@@ -1,17 +1,25 @@
 import React from 'react';
 import { Award } from 'lucide-react';
 
-export default function Achievements() {
-  const certificates = [
-    { title: "Inorganic Chemistry Certificate", bg: "bg-yellow-100", border: "border-yellow-400", buttonBg: "bg-yellow-400" },
-    { title: "Social Philosophy Certificate", bg: "bg-purple-100", border: "border-purple-400", buttonBg: "bg-purple-400" }
-  ];
+interface AchievementsProps {
+  achievements: Array<{
+    title: string;
+    bg: string;
+    border: string;
+    buttonBg: string;
+  }>;
+}
+
+export default function Achievements({ achievements }: AchievementsProps) {
+  if (!achievements || achievements.length === 0) {
+    return null; // Don't show the section if there are no achievements
+  }
 
   return (
     <section>
       <h2 className="text-2xl font-black uppercase mb-4">Achievements</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {certificates.map((cert, idx) => (
+        {achievements.map((cert, idx) => (
           <div 
             key={idx} 
             className={`${cert.bg} border-4 border-black rounded-2xl p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[6px] hover:translate-y-[6px] transition-all cursor-pointer relative overflow-hidden`}

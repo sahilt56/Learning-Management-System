@@ -4,18 +4,8 @@ import { Hash, Send, Users } from 'lucide-react';
 export default function Community() {
   const [message, setMessage] = useState('');
   
-  const channels = [
-    { name: 'general', active: true },
-    { name: 'react-help' },
-    { name: 'ui-design-feedback' },
-    { name: 'career-advice' },
-  ];
-
-  const messages = [
-    { user: 'Alex_Dev', avatar: 'Alex', text: 'Hey everyone! Is anyone else stuck on the latest React assignment?', time: '10:30 AM', color: 'bg-blue-100' },
-    { user: 'Sarah_UI', avatar: 'Sarah', text: 'Yes, the router part is a bit tricky. Make sure you wrap your App in BrowserRouter!', time: '10:32 AM', color: 'bg-pink-100' },
-    { user: 'John_Smith', avatar: 'John', text: 'Thanks Sarah, that fixed my bug!', time: '10:45 AM', color: 'bg-green-100' },
-  ];
+  const channels: any[] = [];
+  const messages: any[] = [];
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();

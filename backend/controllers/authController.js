@@ -6,18 +6,40 @@ const User = require('../models/User');
 const syncUser = async (req, res) => {
   try {
     const { uid, email, name, picture } = req.user; // from authMiddleware
+    const { role, plan } = req.body; // Allow frontend to pass these during signup
 
-    // Check if user exists in MongoDB
+    // Check if user exists in MongoDB by firebaseUid
     let user = await User.findOne({ firebaseUid: uid });
 
     if (!user) {
-      // Create new user
-      user = await User.create({
-        firebaseUid: uid,
-        email,
-        name: name || email.split('@')[0],
-        profilePicture: picture || '',
-      });
+      // Check if email already exists (e.g. admin created manually via script)
+      const existingByEmail = await User.findOne({ email });
+      if (existingByEmail) {
+        // Link Firebase UID to existing record (preserves admin role)
+        existingByEmail.firebaseUid = uid;
+        existingByEmail.profilePicture = existingByEmail.profilePicture || picture || '';
+        existingByEmail.name = existingByEmail.name || name || email.split('@')[0];
+        await existingByEmail.save();
+        user = existingByEmail;
+      } else {
+        // Create new user
+        user = await User.create({
+          firebaseUid: uid,
+          email,
+          name: name || email.split('@')[0],
+          profilePicture: picture || '',
+          role: role || 'student',
+          plan: plan || 'none',
+        });
+      }
+    } else if (role || plan) {
+      // If user exists but we are explicitly passing role/plan (e.g. late selection)
+      // IMPORTANT: Never downgrade an admin
+      if (role && user.role !== role && user.role !== 'admin') {
+        user.role = role;
+      }
+      if (plan && user.plan !== plan) user.plan = plan;
+      await user.save();
     }
 
     res.status(200).json({
@@ -28,6 +50,7 @@ const syncUser = async (req, res) => {
         email: user.email,
         name: user.name,
         role: user.role,
+        plan: user.plan,
         profilePicture: user.profilePicture
       }
     });
@@ -52,6 +75,7 @@ const getUserProfile = async (req, res) => {
         email: user.email,
         name: user.name,
         role: user.role,
+        plan: user.plan,
         profilePicture: user.profilePicture
       });
     } else {

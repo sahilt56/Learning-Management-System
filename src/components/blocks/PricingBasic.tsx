@@ -58,7 +58,7 @@ const demoPlans = [
   },
 ];
 
-export function PricingBasic() {
+export function PricingBasic({ onPlanSelect }: { onPlanSelect?: (plan: any) => void }) {
   return (
     <div className="py-8 rounded-lg bg-black">
       <Pricing 
@@ -66,6 +66,7 @@ export function PricingBasic() {
         title="Pricing for Instructors"
         description="Launch your online teaching career today.
 All plans include access to our course builder, file hosting, and secure payment processing."
+        onPlanSelect={onPlanSelect}
       />
     </div>
   );

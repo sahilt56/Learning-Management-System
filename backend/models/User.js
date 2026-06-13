@@ -19,10 +19,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  headline: {
+    type: String,
+    default: 'Instructor',
+  },
   role: {
     type: String,
     enum: ['student', 'instructor', 'admin'],
     default: 'student',
+  },
+  plan: {
+    type: String,
+    enum: ['free', 'pro', 'enterprise', 'none'],
+    default: 'none',
   },
   // Add other fields as necessary (e.g., enrolledCourses)
 }, { timestamps: true });

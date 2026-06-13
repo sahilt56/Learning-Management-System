@@ -39,11 +39,11 @@ export const FAQ = ({
 
 const FAQHeader = ({ title, subtitle }: any) => (
   <div className="relative z-10 flex flex-col items-center justify-center text-center">
-    <span className="mb-8 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text font-medium text-transparent">
+    <span className="mb-8 text-slate-400 font-medium">
       {subtitle}
     </span>
     <h2 className="mb-8 text-4xl md:text-5xl font-bold">{title}</h2>
-    <span className="absolute -top-[350px] left-[50%] z-0 h-[500px] w-[600px] -translate-x-[50%] rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/5 blur-3xl pointer-events-none" />
+    <span className="absolute -top-[350px] left-[50%] z-0 h-[500px] w-[600px] -translate-x-[50%] rounded-full bg-slate-800/30 blur-3xl pointer-events-none" />
   </div>
 );
 
@@ -56,7 +56,7 @@ const FAQTabs = ({ categories, selected, setSelected }: any) => (
         className={cn(
           "relative overflow-hidden whitespace-nowrap rounded-md border px-4 py-2 text-sm font-medium transition-colors duration-500",
           selected === key
-            ? "border-indigo-500 text-white"
+            ? "border-slate-500 text-white"
             : "border-slate-800 bg-transparent text-slate-400 hover:text-slate-200"
         )}
       >
@@ -68,7 +68,7 @@ const FAQTabs = ({ categories, selected, setSelected }: any) => (
               animate={{ y: "0%" }}
               exit={{ y: "100%" }}
               transition={{ duration: 0.5, ease: "backIn" }}
-              className="absolute inset-0 z-0 bg-gradient-to-r from-indigo-500 to-purple-600"
+              className="absolute inset-0 z-0 bg-slate-800"
             />
           )}
         </AnimatePresence>
@@ -111,7 +111,7 @@ const FAQItem = ({ question, answer }: any) => {
       animate={isOpen ? "open" : "closed"}
       className={cn(
         "rounded-xl border transition-colors overflow-hidden",
-        isOpen ? "bg-slate-900 border-indigo-500/30" : "bg-slate-950 border-slate-800"
+        isOpen ? "bg-slate-900 border-slate-500/50" : "bg-slate-950 border-slate-800"
       )}
     >
       <button
@@ -137,7 +137,7 @@ const FAQItem = ({ question, answer }: any) => {
           <Plus
             className={cn(
               "h-5 w-5 transition-colors",
-              isOpen ? "text-indigo-400" : "text-slate-500"
+              isOpen ? "text-slate-300" : "text-slate-500"
             )}
           />
         </motion.span>

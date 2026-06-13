@@ -2,94 +2,53 @@ import { Star, Clock, Users, ArrowRight, BookOpen, Award } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { AnimatedButton } from "./ui/animated-button";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { Skeleton } from "./ui/skeleton";
 
 interface Course {
-  id: string;
+  _id: string;
   title: string;
   category: string;
   instructor: {
     name: string;
-    role: string;
-    avatar: string;
+    headline?: string;
+    profilePicture?: string;
   };
   level: string;
   duration: string;
-  studentsCount: string;
+  studentsCount: number;
   rating: number;
   reviewsCount: number;
   price: number;
   originalPrice: number;
   badge?: string;
-  image: string;
+  thumbnailUrl?: string;
   description: string;
+  teacherNames?: string[];
+  customTeacherName?: string;
+  customTeacherPhoto?: string;
 }
-
-const FEATURED_COURSES: Course[] = [
-  {
-    id: "fullstack-web",
-    title: "Full-Stack Web Development Bootcamp",
-    category: "Software Engineering",
-    instructor: {
-      name: "Sarah Jenkins",
-      role: "Ex-Google Engineer",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100",
-    },
-    level: "Beginner to Pro",
-    duration: "32 Weeks",
-    studentsCount: "8.5k students",
-    rating: 4.9,
-    reviewsCount: 1240,
-    price: 199,
-    originalPrice: 399,
-    badge: "Bestseller",
-    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80",
-    description: "Master React, Node.js, Next.js, and SQL. Build production-grade SaaS platforms from scratch.",
-  },
-  {
-    id: "ai-deep-learning",
-    title: "AI & Deep Learning Masterclass",
-    category: "Data Science",
-    instructor: {
-      name: "Dr. Amit Patel",
-      role: "Stanford AI Researcher",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100",
-    },
-    level: "Advanced",
-    duration: "24 Weeks",
-    studentsCount: "5.2k students",
-    rating: 4.8,
-    reviewsCount: 840,
-    price: 249,
-    originalPrice: 499,
-    badge: "Trending",
-    image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=600&q=80",
-    description: "Train neural networks, build large language models (LLMs), and implement computer vision systems.",
-  },
-  {
-    id: "uiux-design",
-    title: "UI/UX Design Masterclass & Case Studies",
-    category: "Product Design",
-    instructor: {
-      name: "Elena Rostova",
-      role: "Lead Product Designer",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100",
-    },
-    level: "All Levels",
-    duration: "16 Weeks",
-    studentsCount: "6.1k students",
-    rating: 4.9,
-    reviewsCount: 950,
-    price: 149,
-    originalPrice: 299,
-    badge: "New",
-    image: "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=600&q=80",
-    description: "Learn high-fidelity UI design, user research methodologies, and build interactive Figma prototypes.",
-  },
-];
 
 export default function FeaturedCourses() {
   const targetRef = useRef<HTMLElement>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/courses');
+        setCourses(res.data.slice(0, 3)); // Display top 3
+      } catch (err) {
+        console.error("Failed to fetch courses", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
   const { scrollYProgress } = useScroll({
     target: targetRef,
     offset: ["start start", "end end"]
@@ -151,110 +110,122 @@ export default function FeaturedCourses() {
         <div className={`w-full relative z-10 py-8 ${isMobile ? 'overflow-hidden' : 'overflow-x-auto overflow-y-hidden'}`}>
           {/* Ensure all cards stay in the first row without wrapping */}
           <div className={`flex flex-row flex-nowrap ${isMobile ? 'overflow-x-auto snap-x snap-mandatory gap-6 px-6 pb-4 scroll-smooth no-scrollbar' : 'justify-start 2xl:justify-center gap-3 lg:gap-4 pl-8 md:pl-2 lg:pl-10 pr-4 w-max min-w-full max-w-[1400px] mx-auto items-stretch'}`}>
-            {FEATURED_COURSES.map((course, index) => {
-              const anim = animations[index];
-              return (
-                <motion.div 
-                  key={course.id} 
-                  style={{ 
-                    x: isMobile ? 0 : anim.x, 
-                    opacity: isMobile ? 1 : anim.opacity, 
-                    scale: isMobile ? 1 : anim.scale 
-                  }}
-                  className={`w-[80vw] sm:w-[320px] md:w-[340px] lg:w-[310px] xl:w-[290px] 2xl:w-[360px] shrink-0 ${isMobile ? 'snap-center' : ''}`}
-                >
-                  <div className="w-full h-full group bg-slate-900/30 border border-slate-900 hover:border-slate-800/80 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-[0_12px_40px_-15px_rgba(0,0,0,0.6)]">
-                    {/* Image Container */}
-                    <div className="relative aspect-[16/10] overflow-hidden">
-                      <img
-                        src={course.image}
-                        alt={course.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                      />
-                      
-                      {/* Badges on Top Left */}
-                      {course.badge && (
-                        <span className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md text-white border border-white/10 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                          {course.badge}
-                        </span>
-                      )}
-                      
-                      {/* Category tag */}
-                      <span className="absolute bottom-4 left-4 bg-slate-950/90 text-indigo-400 text-[10px] font-bold uppercase px-2.5 py-1 rounded border border-slate-800">
-                        {course.category}
-                      </span>
+            
+            {loading ? (
+              // Skeleton Loader Cards
+              Array.from({ length: 3 }).map((_, idx) => (
+                <div key={idx} className={`w-[80vw] sm:w-[320px] md:w-[340px] lg:w-[310px] xl:w-[290px] 2xl:w-[360px] shrink-0 h-[420px] bg-slate-900/50 rounded-2xl overflow-hidden border border-slate-800 ${isMobile ? 'snap-center' : ''}`}>
+                  <Skeleton className="w-full h-[180px] bg-slate-800/80 rounded-none" />
+                  <div className="p-5 flex flex-col gap-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-7 h-7 rounded-full bg-slate-800/80" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-3 w-24 bg-slate-800/80" />
+                        <Skeleton className="h-2 w-16 bg-slate-800/80" />
+                      </div>
                     </div>
-
-                    {/* Course Info */}
-                    <div className="p-5 flex-1 flex flex-col justify-between">
-                      <div className="space-y-3">
-                        {/* Instructor detail */}
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={course.instructor.avatar}
-                            alt={course.instructor.name}
-                            className="w-7 h-7 rounded-full object-cover border border-slate-800"
-                          />
-                          <div>
-                            <div className="text-xs font-semibold text-slate-200">{course.instructor.name}</div>
-                            <div className="text-[10px] text-slate-400">{course.instructor.role}</div>
-                          </div>
-                        </div>
-
-                        {/* Title */}
-                        <h3 className="text-lg font-bold text-white leading-snug group-hover:text-indigo-400 transition-colors">
-                          {course.title}
-                        </h3>
-
-                        {/* Short description */}
-                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                          {course.description}
-                        </p>
-                      </div>
-
-                      <div className="mt-5 space-y-4">
-                        {/* Metadata Row */}
-                        <div className="flex items-center justify-between py-3 border-y border-slate-900/80 text-[11px] text-slate-400">
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
-                            <span className="font-bold text-slate-200">{course.rating}</span>
-                            <span className="text-[10px]">({course.reviewsCount})</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5 text-slate-500" />
-                            <span>{course.duration}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5 text-slate-500" />
-                            <span>{course.studentsCount}</span>
-                          </div>
-                        </div>
-
-                        {/* Level tag */}
-                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                          <Award className="h-4 w-4 text-purple-400 shrink-0" />
-                          <span>{course.level}</span>
-                        </div>
-
-                        {/* Pricing and Action */}
-                        <div className="flex items-center justify-between pt-2">
-                          <div className="flex flex-col">
-                            <span className="text-[10px] text-slate-500 line-through leading-none mb-1">${course.originalPrice}</span>
-                            <span className="text-xl font-bold text-white leading-none">${course.price}</span>
-                          </div>
-                          
-                          <div className="w-1/2">
-                            <AnimatedButton href={`#enroll/${course.id}`} className="!py-2 !px-4 !text-xs !gap-1" wrapperClassName="w-full">
-                              Enroll Now
-                            </AnimatedButton>
-                          </div>
-                        </div>
-                      </div>
+                    <Skeleton className="h-6 w-3/4 bg-slate-800/80" />
+                    <Skeleton className="h-10 w-full bg-slate-800/80" />
+                    <div className="mt-auto flex justify-between items-center pt-4 border-t border-slate-800">
+                      <Skeleton className="h-8 w-16 bg-slate-800/80" />
+                      <Skeleton className="h-8 w-24 bg-slate-800/80" />
                     </div>
                   </div>
-                </motion.div>
-              );
-            })}
+                </div>
+              ))
+            ) : (
+              courses.map((course, index) => {
+                const anim = animations[index] || animations[2]; // Fallback animation if more than 3
+                return (
+                  <motion.div 
+                    key={course._id} 
+                    style={{ 
+                      x: isMobile ? 0 : anim.x, 
+                      opacity: isMobile ? 1 : anim.opacity, 
+                      scale: isMobile ? 1 : anim.scale 
+                    }}
+                    className={`w-[80vw] sm:w-[320px] md:w-[340px] lg:w-[310px] xl:w-[290px] 2xl:w-[360px] shrink-0 ${isMobile ? 'snap-center' : ''}`}
+                  >
+                    <div className="w-full h-full group bg-slate-900/30 border border-slate-900 hover:border-slate-800/80 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-[0_12px_40px_-15px_rgba(0,0,0,0.6)]">
+                      {/* Image Container */}
+                      <div className="relative aspect-[16/10] overflow-hidden">
+                        <img
+                          src={course.thumbnailUrl || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80"}
+                          alt={course.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                        />
+                        
+                        {/* Badges on Top Left */}
+                        {course.badge && (
+                          <span className="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md text-white border border-white/10 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                            {course.badge}
+                          </span>
+                        )}
+                        
+                        {/* Category tag */}
+                        <span className="absolute bottom-4 left-4 bg-slate-950/90 text-indigo-400 text-[10px] font-bold uppercase px-2.5 py-1 rounded border border-slate-800">
+                          {course.category}
+                        </span>
+                      </div>
+
+                      {/* Course Info */}
+                      <div className="p-5 flex-1 flex flex-col justify-between">
+                        <div className="space-y-3">
+                          {/* Title */}
+                          <h3 className="text-lg font-bold text-white leading-snug group-hover:text-indigo-400 transition-colors">
+                            {course.title}
+                          </h3>
+
+                          {/* Short description */}
+                          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed break-all">
+                            {course.description}
+                          </p>
+                        </div>
+
+                        <div className="mt-5 space-y-4">
+                          {/* Metadata Row */}
+                          <div className="flex items-center justify-between py-3 border-y border-slate-900/80 text-[11px] text-slate-400">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
+                              <span className="font-bold text-slate-200">{course.rating}</span>
+                              <span className="text-[10px]">({course.reviewsCount})</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5 text-slate-500" />
+                              <span>{course.duration}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3.5 w-3.5 text-slate-500" />
+                              <span>{course.studentsCount}</span>
+                            </div>
+                          </div>
+
+                          {/* Level tag */}
+                          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                            <Award className="h-4 w-4 text-purple-400 shrink-0" />
+                            <span>{course.level}</span>
+                          </div>
+
+                          {/* Pricing and Action */}
+                          <div className="flex items-center justify-between pt-2">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-slate-500 line-through leading-none mb-1">${course.originalPrice}</span>
+                              <span className="text-xl font-bold text-white leading-none">${course.price}</span>
+                            </div>
+                            
+                            <div className="w-1/2">
+                              <AnimatedButton href={`/courses/${course._id}`} className="!py-2 !px-4 !text-xs !gap-1" wrapperClassName="w-full">
+                                Enroll Now
+                              </AnimatedButton>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })
+            )}
 
             {/* 4th Card: More Courses Option */}
             <motion.div
@@ -265,13 +236,13 @@ export default function FeaturedCourses() {
               }}
               className={`w-[80vw] sm:w-[280px] md:w-[300px] lg:w-[320px] shrink-0 h-auto flex items-center justify-center ${isMobile ? 'snap-center' : ''}`}
             >
-              <a href="#all-courses" className="w-full h-full min-h-[350px] group bg-indigo-950/20 border border-indigo-900/30 hover:border-indigo-500/50 hover:bg-indigo-900/30 rounded-2xl overflow-hidden flex flex-col justify-center items-center transition-all duration-300 p-6 text-center cursor-pointer">
+              <Link to="/courses" className="w-full h-full min-h-[350px] group bg-indigo-950/20 border border-indigo-900/30 hover:border-indigo-500/50 hover:bg-indigo-900/30 rounded-2xl overflow-hidden flex flex-col justify-center items-center transition-all duration-300 p-6 text-center cursor-pointer">
                 <div className="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
                   <ArrowRight className="w-8 h-8 text-indigo-400 group-hover:translate-x-1 transition-transform" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">More Courses</h3>
                 <p className="text-sm text-slate-400">Explore our entire catalog of premium bootcamps & masterclasses.</p>
-              </a>
+              </Link>
             </motion.div>
             
           </div>

@@ -8,7 +8,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Mail, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React from "react";
-
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 interface PupilProps {
   size?: number;
@@ -183,6 +187,9 @@ export default function LoginPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [isLookingAtEachOther, setIsLookingAtEachOther] = useState(false);
   const [isPurplePeeking, setIsPurplePeeking] = useState(false);
+  
+  // Role is determined by the database, not by the user on login
+
   const purpleRef = useRef<HTMLDivElement>(null);
   const blackRef = useRef<HTMLDivElement>(null);
   const yellowRef = useRef<HTMLDivElement>(null);
@@ -290,20 +297,86 @@ export default function LoginPage() {
   const yellowPos = calculatePosition(yellowRef);
   const orangePos = calculatePosition(orangeRef);
 
+  const navigate = useNavigate();
+  const { setDbUser } = useAuth();
+
+  const getPasswordStrength = (pass: string) => {
+    if (!pass) return { score: 0, text: '', color: 'bg-slate-700' };
+    let score = 0;
+    if (pass.length > 5) score += 1;
+    if (pass.length > 7) score += 1;
+    if (/[A-Z]/.test(pass) && /[a-z]/.test(pass)) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+    
+    if (score < 2) return { score: 1, text: 'Weak', color: 'bg-red-500', textColor: 'text-red-400' };
+    if (score < 4) return { score: 2, text: 'Medium', color: 'bg-yellow-500', textColor: 'text-yellow-400' };
+    return { score: 3, text: 'Strong', color: 'bg-green-500', textColor: 'text-green-400' };
+  };
+
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email === '';
+  const passStrength = getPasswordStrength(password);
+  const isFormValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && password.length >= 6;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFormValid) return;
     setError("");
     setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 300));
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await userCredential.user.getIdToken();
+      
+      // Sync with backend — NO role passed, DB is the source of truth
+      const syncRes = await axios.post('http://localhost:5000/api/auth/sync', {}, {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
 
-    if (email === "erik@gmail.com" && password === "1234") {
-      alert("Login successful! Welcome, Erik!");
-    } else {
-      setError("Invalid email or password. Please try again.");
+      // Update context so ProtectedRoute gets correct role immediately
+      setDbUser(syncRes.data.user);
+
+      if (syncRes.data.user.role === 'instructor') {
+        navigate('/instructor');
+      } else if (syncRes.data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Invalid email or password. Please try again.");
     }
 
     setIsLoading(false);
+  };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const idToken = await userCredential.user.getIdToken();
+
+      // Sync with backend — NO role passed, DB is the source of truth
+      const syncRes = await axios.post('http://localhost:5000/api/auth/sync', {}, {
+        headers: { Authorization: `Bearer ${idToken}` }
+      });
+
+      // Update context so ProtectedRoute gets correct role immediately
+      setDbUser(syncRes.data.user);
+
+      if (syncRes.data.user.role === 'instructor') {
+        navigate('/instructor');
+      } else if (syncRes.data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Failed to log in with Google.");
+    }
   };
 
   return (
@@ -472,25 +545,36 @@ export default function LoginPage() {
             <p className="text-slate-400 text-sm">Please enter your details</p>
           </div>
 
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-slate-300">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="anna@gmail.com"
+                placeholder="anna@example.com"
                 value={email}
                 autoComplete="off"
                 onChange={(e) => setEmail(e.target.value)}
                 onFocus={() => setIsTyping(true)}
                 onBlur={() => setIsTyping(false)}
                 required
-                className="h-12 rounded-xl bg-slate-900/50 backdrop-blur-sm border-slate-800/60 focus:bg-slate-900 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 text-white placeholder:text-slate-500 transition-all"
+                className={`h-12 rounded-xl bg-slate-900/50 backdrop-blur-sm focus:bg-slate-900 focus:ring-2 text-white placeholder:text-slate-500 transition-all ${
+                  email && !isEmailValid ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-800/60 focus:border-indigo-500/50 focus:ring-indigo-500/20'
+                }`}
               />
+              {email && !isEmailValid && <p className="text-xs text-red-400">Please enter a valid email address.</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-slate-300">Password</Label>
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password" className="text-sm font-medium text-slate-300">Password</Label>
+                {password && (
+                  <span className={`text-xs font-semibold ${passStrength.textColor}`}>
+                    {passStrength.text}
+                  </span>
+                )}
+              </div>
               <div className="relative">
                 <Input
                   id="password"
@@ -506,16 +590,23 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
                 >
-                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                  {showPassword ? <Eye className="size-5" /> : <EyeOff className="size-5" />}
                 </button>
               </div>
+              {password && (
+                <div className="flex gap-1 mt-2">
+                  <div className={`h-1.5 flex-1 rounded-full ${passStrength.score >= 1 ? passStrength.color : 'bg-slate-700'}`} />
+                  <div className={`h-1.5 flex-1 rounded-full ${passStrength.score >= 2 ? passStrength.color : 'bg-slate-700'}`} />
+                  <div className={`h-1.5 flex-1 rounded-full ${passStrength.score >= 3 ? passStrength.color : 'bg-slate-700'}`} />
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mt-2">
               <div className="flex items-center space-x-2">
                 <Checkbox id="remember" className="border-slate-700 data-[state=checked]:bg-indigo-600 data-[state=checked]:text-white" />
                 <Label htmlFor="remember" className="text-sm font-normal cursor-pointer text-slate-400">
-                  Remember for 30 days
+                  Remember me
                 </Label>
               </div>
               <a href="/forgot-password" className="text-sm text-indigo-400 hover:text-indigo-300 font-medium hover:underline">
@@ -531,9 +622,13 @@ export default function LoginPage() {
 
             <Button 
               type="submit" 
-              className="w-full h-12 text-base font-medium bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white border-0 rounded-xl shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5" 
+              className={`w-full h-12 text-base font-medium border-0 rounded-xl shadow-lg transition-all mt-4 ${
+                isFormValid && !isLoading
+                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white shadow-indigo-500/25 hover:-translate-y-0.5' 
+                  : 'bg-slate-800 text-slate-500 cursor-not-allowed shadow-none'
+              }`}
               size="lg" 
-              disabled={isLoading}
+              disabled={isLoading || !isFormValid}
             >
               {isLoading ? "Signing in..." : "Log in"}
             </Button>
@@ -544,6 +639,7 @@ export default function LoginPage() {
               variant="outline" 
               className="w-full h-12 bg-slate-900/50 backdrop-blur-sm border-slate-800 hover:bg-slate-800/80 text-white rounded-xl transition-all"
               type="button"
+              onClick={handleGoogleLogin}
             >
               <Mail className="mr-2 size-5" />
               Log in with Google

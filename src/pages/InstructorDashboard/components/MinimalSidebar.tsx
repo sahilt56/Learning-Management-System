@@ -6,6 +6,7 @@ export default function MinimalSidebar() {
   const menuItems = [
     { name: 'Overview', icon: <LayoutGrid className="w-5 h-5" />, path: '/instructor', exact: true },
     { name: 'Course Manager', icon: <BookOpen className="w-5 h-5" />, path: '/instructor/courses' },
+    { name: 'Classrooms', icon: <Users className="w-5 h-5" />, path: '/instructor/classrooms' },
     { name: 'Students', icon: <Users className="w-5 h-5" />, path: '/instructor/students' },
     { name: 'Live Classes', icon: <Video className="w-5 h-5" />, path: '/instructor/live' },
     { name: 'Assignments', icon: <FileEdit className="w-5 h-5" />, path: '/instructor/assignments' },

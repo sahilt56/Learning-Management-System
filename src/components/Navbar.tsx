@@ -267,7 +267,7 @@ export default function LMSNavbar() {
   const navItems = [
     { name: "Home", link: "/" },
     { name: "About", link: "/about" },
-    { name: "Courses", link: "/#courses" },
+    { name: "Courses", link: "/courses" },
     { name: "Reviews", link: "/#testimonials" },
   ];
 
@@ -279,10 +279,10 @@ export default function LMSNavbar() {
         {/* Desktop Navigation */}
         <NavBody>
           <div className="flex items-center space-x-2 cursor-pointer z-20">
-            <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-lg text-white">
+            <div className="bg-blue-600 border border-white/20 p-2 rounded-lg text-white shadow-sm">
               <BookOpen className="h-5 w-5" />
             </div>
-            <span className="text-lg font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="text-xl font-black tracking-tight text-white uppercase">
               Eduverse
             </span>
           </div>
@@ -300,10 +300,10 @@ export default function LMSNavbar() {
         <MobileNav className="bg-slate-950/80 backdrop-blur-md border border-slate-800 rounded-2xl mx-4">
           <MobileNavHeader className="px-4 py-2">
             <div className="flex items-center space-x-2 cursor-pointer">
-              <div className="bg-gradient-to-tr from-indigo-500 to-purple-500 p-1.5 rounded-lg text-white">
+              <div className="bg-blue-600 border border-white/20 p-1.5 rounded-lg text-white shadow-sm">
                 <BookOpen className="h-4 w-4" />
               </div>
-              <span className="text-md font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-lg font-black tracking-tight text-white uppercase">
                 Eduverse
               </span>
             </div>

@@ -5,16 +5,18 @@ export default function QuizArena() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   
-  const questions = [
-    {
-      q: "Which hook is used to perform side effects in a functional component?",
-      options: ["useState", "useEffect", "useContext", "useReducer"]
-    },
-    {
-      q: "What does JSX stand for?",
-      options: ["JavaScript XML", "JSON Syntax Extension", "Java Standard eXtension", "None of the above"]
-    }
-  ];
+  const questions: any[] = [];
+
+  if (questions.length === 0) {
+    return (
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto pt-8">
+        <h1 className="text-4xl font-black uppercase mb-2 text-center">Quiz Arena</h1>
+        <div className="bg-white border-4 border-black border-dashed rounded-xl p-12 text-center text-gray-500 font-bold">
+          No active quizzes at the moment.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto pt-8">

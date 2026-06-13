@@ -11,10 +11,11 @@ import Certificates from "./views/Certificates";
 import SettingsView from "./views/SettingsView";
 import Performance from "./views/Performance";
 import Community from "./views/Community";
+import MyClassrooms from "./views/MyClassrooms";
 
 export default function Dashboard() {
   return (
-    <div className="flex bg-[#f4f7f9] text-black font-sans w-full min-h-screen">
+    <div className="flex bg-[#f4f7f9] text-black font-sans w-full h-screen overflow-hidden">
       
       {/* LEFT COLUMN: SIDEBAR */}
       <Sidebar />
@@ -24,6 +25,7 @@ export default function Dashboard() {
         <Routes>
           <Route path="/" element={<DashboardOverview />} />
           <Route path="/schedule" element={<ClassSchedule />} />
+          <Route path="/classrooms" element={<MyClassrooms />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/assignments" element={<Assignments />} />
           <Route path="/quiz" element={<QuizArena />} />

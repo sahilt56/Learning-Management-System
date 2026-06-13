@@ -1,13 +1,36 @@
 import React from 'react';
-import { Mic, FileText, Clock } from 'lucide-react';
+import { Mic, FileText, Clock, AlertCircle } from 'lucide-react';
 
-export default function DeadlinesPanel() {
-  const tasks = [
-    { title: "Demo Speech", subtitle: "Mass Communication", icon: <Mic className="w-6 h-6 text-red-500" />, iconBg: "bg-red-100", group: "TODAY" },
-    { title: "Globalization Essay", subtitle: "Advanced Geography", icon: <FileText className="w-6 h-6 text-orange-500" />, iconBg: "bg-orange-100", group: "TODAY" },
-    { title: "Management Quiz", subtitle: "Product Management", icon: <Clock className="w-6 h-6 text-purple-500" />, iconBg: "bg-purple-100", group: "THIS WEEK", active: true },
-    { title: "Docu Reaction Paper", subtitle: "Advanced Geography", icon: <FileText className="w-6 h-6 text-orange-500" />, iconBg: "bg-orange-100", group: "THIS WEEK" },
-  ];
+const iconMap: Record<string, React.ReactNode> = {
+  Mic: <Mic className="w-6 h-6 text-red-500" />,
+  FileText: <FileText className="w-6 h-6 text-orange-500" />,
+  Clock: <Clock className="w-6 h-6 text-purple-500" />,
+  AlertCircle: <AlertCircle className="w-6 h-6 text-blue-500" />
+};
+
+interface DeadlinesPanelProps {
+  tasks: Array<{
+    title: string;
+    subtitle: string;
+    group: string;
+    icon: string;
+    iconBg: string;
+    iconColor?: string;
+    active?: boolean;
+  }>;
+}
+
+export default function DeadlinesPanel({ tasks }: DeadlinesPanelProps) {
+  if (!tasks || tasks.length === 0) {
+    return (
+      <section>
+        <h2 className="text-2xl font-black uppercase mb-4">Upcoming Tasks</h2>
+        <div className="bg-white border-4 border-black border-dashed rounded-xl p-8 text-center text-gray-500 font-bold">
+          No upcoming tasks.
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section>
@@ -21,7 +44,7 @@ export default function DeadlinesPanel() {
               <div key={idx} className="bg-white border-4 border-black rounded-xl p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all cursor-pointer flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className={`p-3 rounded-lg ${task.iconBg} border-2 border-black`}>
-                    {task.icon}
+                    {iconMap[task.icon] || iconMap['AlertCircle']}
                   </div>
                   <div>
                     <h4 className="font-black text-lg">{task.title}</h4>
@@ -41,7 +64,7 @@ export default function DeadlinesPanel() {
               <div key={idx} className={`border-4 border-black rounded-xl p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all cursor-pointer flex items-center justify-between ${task.active ? 'bg-white scale-105 z-10 relative -ml-2 -mr-2 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]' : 'bg-white'}`}>
                 <div className="flex items-center gap-4">
                   <div className={`p-3 rounded-lg ${task.iconBg} border-2 border-black`}>
-                    {task.icon}
+                    {iconMap[task.icon] || iconMap['AlertCircle']}
                   </div>
                   <div>
                     <h4 className="font-black text-lg">{task.title}</h4>
