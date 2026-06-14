@@ -1,10 +1,47 @@
-import React, { useState } from 'react';
-import { Camera, Save, User, Mail, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Camera, Save, User, Mail, Lock, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function SettingsView() {
-  const [name, setName] = useState('Sahil Patel');
-  const [email, setEmail] = useState('sahil@example.com');
-  const [bio, setBio] = useState('Frontend Developer & Design Enthusiast');
+  const { user, token } = useAuth();
+  
+  const [name, setName] = useState((user as any)?.name || user?.displayName || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [bio, setBio] = useState((user as any)?.headline || '');
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setName((user as any)?.name || user?.displayName || '');
+      setEmail(user.email || '');
+      setBio((user as any)?.headline || '');
+    }
+  }, [user]);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return alert('You must be logged in to update your profile.');
+
+    try {
+      setIsSaving(true);
+      await axios.put('http://localhost:5000/api/auth/profile', {
+        name,
+        headline: bio
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      alert('Profile updated successfully!');
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      alert('Failed to update profile. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl">
@@ -22,7 +59,7 @@ export default function SettingsView() {
         <div className="flex items-center gap-6 mb-8">
           <div className="relative">
             <div className="w-24 h-24 rounded-full border-4 border-black overflow-hidden bg-yellow-400 shrink-0">
-              <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Sahil" alt="Profile" className="w-full h-full object-cover" />
+              <img src={(user as any)?.profilePicture || `https://api.dicebear.com/7.x/notionists/svg?seed=${name || 'User'}`} alt="Profile" className="w-full h-full object-cover" />
             </div>
             <button className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 border-2 border-black rounded-full hover:bg-blue-600 hover:scale-110 transition-transform">
               <Camera className="w-4 h-4" />
@@ -38,7 +75,7 @@ export default function SettingsView() {
         </div>
 
         {/* Edit Form */}
-        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-6" onSubmit={handleSaveProfile}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="font-black text-sm uppercase">Full Name</label>
@@ -60,8 +97,8 @@ export default function SettingsView() {
                 <input 
                   type="email" 
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-gray-50 border-4 border-black rounded-xl py-3 pl-10 pr-4 font-bold outline-none focus:ring-4 focus:ring-yellow-400 focus:bg-white transition-all"
+                  disabled
+                  className="w-full bg-gray-100 border-4 border-black rounded-xl py-3 pl-10 pr-4 font-bold outline-none cursor-not-allowed opacity-70"
                 />
               </div>
             </div>
@@ -78,8 +115,13 @@ export default function SettingsView() {
           </div>
 
           <div className="pt-4 border-t-4 border-black flex justify-end">
-            <button className="bg-yellow-400 text-black border-4 border-black px-8 py-3 rounded-xl font-black uppercase tracking-wider flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-              <Save className="w-5 h-5" /> Save Changes
+            <button 
+              type="submit"
+              disabled={isSaving}
+              className="bg-yellow-400 text-black border-4 border-black px-8 py-3 rounded-xl font-black uppercase tracking-wider flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />} 
+              {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>

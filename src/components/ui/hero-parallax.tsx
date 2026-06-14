@@ -137,7 +137,7 @@ export const Header = ({
     <>
       Your All-in-One Learning Ecosystem{" "}
       <span className="text-blue-400 font-condiment font-normal lowercase text-5xl md:text-8xl align-middle inline-block mt-2 md:mt-0">
-        eduverse
+        SikshaStack
       </span>
     </>
   );

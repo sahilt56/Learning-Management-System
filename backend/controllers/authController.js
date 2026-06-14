@@ -86,7 +86,42 @@ const getUserProfile = async (req, res) => {
   }
 }
 
+// @desc    Update Current User Profile
+// @route   PUT /api/auth/profile
+// @access  Private (Requires Firebase ID Token)
+const updateUserProfile = async (req, res) => {
+  try {
+    const { name, headline, profilePicture } = req.body;
+    const user = await User.findOne({ firebaseUid: req.user.uid });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found in DB' });
+    }
+
+    if (name !== undefined) user.name = name;
+    if (headline !== undefined) user.headline = headline;
+    if (profilePicture !== undefined) user.profilePicture = profilePicture;
+
+    await user.save();
+
+    res.json({
+      id: user._id,
+      firebaseUid: user.firebaseUid,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      plan: user.plan,
+      headline: user.headline,
+      profilePicture: user.profilePicture
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+}
+
 module.exports = {
   syncUser,
-  getUserProfile
+  getUserProfile,
+  updateUserProfile
 };

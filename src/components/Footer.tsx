@@ -11,7 +11,7 @@ export default function Footer() {
               <BookOpen className="h-5 w-5" />
             </div>
             <span className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              Eduverse
+              SikshaStack
             </span>
           </div>
           <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
@@ -36,7 +36,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-slate-900 text-center text-xs text-slate-600">
-        &copy; {new Date().getFullYear()} Eduverse Inc. All rights reserved.
+        &copy; {new Date().getFullYear()} SikshaStack Inc. All rights reserved.
       </div>
     </footer>
   );

@@ -8,6 +8,7 @@ import AssignmentCreator from './views/AssignmentCreator';
 import GradingDesk from './views/GradingDesk';
 import StudentAnalytics from './views/StudentAnalytics';
 import ClassroomManager from './views/ClassroomManager';
+import InstructorSettings from './views/InstructorSettings';
 
 export default function InstructorDashboard() {
   return (
@@ -27,6 +28,7 @@ export default function InstructorDashboard() {
             <Route path="/live" element={<LiveClasses />} />
             <Route path="/assignments" element={<AssignmentCreator />} />
             <Route path="/grading" element={<GradingDesk />} />
+            <Route path="/settings" element={<InstructorSettings />} />
           </Routes>
         </div>
       </div>

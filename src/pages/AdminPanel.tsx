@@ -562,7 +562,7 @@ export default function AdminPanel() {
             </div>
             <div>
               <div className="font-black text-white text-sm">Admin Panel</div>
-              <div className="text-indigo-400 text-[10px] font-semibold uppercase tracking-wide">Eduverse</div>
+              <div className="text-indigo-400 text-[10px] font-semibold uppercase tracking-wide">SikshaStack</div>
             </div>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white">

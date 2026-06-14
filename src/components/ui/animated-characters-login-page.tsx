@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Mail, Sparkles, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React from "react";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
@@ -384,11 +384,13 @@ export default function LoginPage() {
       {/* Left Content Section */}
       <div className="relative hidden lg:flex flex-col justify-between bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-950 p-12 text-slate-100 overflow-hidden">
         <div className="relative z-20">
-          <div className="flex items-center gap-2 text-lg font-semibold cursor-pointer" onClick={() => window.location.href="/"}>
-            <div className="size-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center">
-              <Sparkles className="size-4" />
+          <div className="flex items-center space-x-2 cursor-pointer z-20" onClick={() => window.location.href="/"}>
+            <div className="bg-blue-600 border border-white/20 p-2 rounded-lg text-white shadow-sm">
+              <BookOpen className="h-5 w-5" />
             </div>
-            <span>Eduverse</span>
+            <span className="text-xl font-black tracking-tight text-white uppercase">
+              SikshaStack
+            </span>
           </div>
         </div>
 
@@ -535,8 +537,13 @@ export default function LoginPage() {
       {/* Right Login Section */}
       <div className="flex items-center justify-center p-8 bg-slate-950 text-slate-100 relative">
         {/* Back to home button for mobile */}
-        <a href="/" className="absolute top-6 left-6 lg:hidden flex items-center gap-2 text-slate-400 hover:text-white">
-          <Sparkles className="size-4" /> Eduverse
+        <a href="/" className="absolute top-6 left-6 lg:hidden flex items-center gap-2 z-20">
+          <div className="bg-blue-600 border border-white/20 p-1.5 rounded-lg text-white shadow-sm">
+            <BookOpen className="h-4 w-4" />
+          </div>
+          <span className="text-lg font-black tracking-tight text-slate-100 uppercase">
+            SikshaStack
+          </span>
         </a>
 
         <div className="w-full max-w-[420px]">

@@ -35,7 +35,7 @@ export default function Sidebar() {
         <div className="bg-blue-600 border-2 border-black p-1.5 rounded text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all cursor-pointer">
           <BookOpen className="w-6 h-6" />
         </div>
-        <h1 className="font-black text-xl tracking-tight uppercase">Eduverse</h1>
+        <h1 className="font-black text-xl tracking-tight uppercase">SikshaStack</h1>
       </Link>
 
       <nav className="flex-1 px-4 py-4 space-y-2">

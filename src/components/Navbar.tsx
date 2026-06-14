@@ -283,7 +283,7 @@ export default function LMSNavbar() {
               <BookOpen className="h-5 w-5" />
             </div>
             <span className="text-xl font-black tracking-tight text-white uppercase">
-              Eduverse
+              SikshaStack
             </span>
           </div>
           
@@ -304,7 +304,7 @@ export default function LMSNavbar() {
                 <BookOpen className="h-4 w-4" />
               </div>
               <span className="text-lg font-black tracking-tight text-white uppercase">
-                Eduverse
+                SikshaStack
               </span>
             </div>
             <MobileNavToggle

@@ -19,7 +19,7 @@ export default function MinimalSidebar() {
       {/* Brand */}
       <div className="px-8 mb-12">
         <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-          Instructor<span className="text-blue-600 font-light">Hub</span>
+          Instructor
         </h2>
       </div>
 
@@ -46,10 +46,19 @@ export default function MinimalSidebar() {
 
       {/* Bottom Actions */}
       <div className="p-4 border-t border-gray-100 space-y-1">
-        <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 cursor-pointer transition-colors">
+        <NavLink 
+          to="/instructor/settings"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+              isActive 
+                ? 'bg-blue-50 text-blue-700' 
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            }`
+          }
+        >
           <Settings className="w-5 h-5" />
           Settings
-        </div>
+        </NavLink>
         <Link to="/" className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 cursor-pointer transition-colors">
           <LogOut className="w-5 h-5" />
           Log out

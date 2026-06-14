@@ -244,7 +244,7 @@ export function CinematicFooter() {
         giantTextRef.current,
         { xPercent: isMobile ? -10 : 10, y: isMobile ? "0vh" : "10vh", scale: isMobile ? 1 : 0.8, opacity: 0 },
         {
-          xPercent: isMobile ? -55 : 0,
+          xPercent: isMobile ? -55 : -50,
           y: "0vh",
           scale: 1,
           opacity: 1,
@@ -311,7 +311,7 @@ export function CinematicFooter() {
             ref={giantTextRef}
             className="footer-giant-bg-text absolute bottom-4 md:bottom-[10vh] lg:-bottom-[5vh] left-1/2 -translate-x-1/2 whitespace-nowrap z-0 pointer-events-none select-none"
           >
-            EDUVERSE
+            SIKSHASTACK
           </div>
 
           {/* 1. Diagonal Sleek Marquee (Top of footer) */}
@@ -354,7 +354,7 @@ export function CinematicFooter() {
             
             {/* Copyright */}
             <div className="text-muted-foreground text-[10px] md:text-xs font-semibold tracking-widest uppercase order-2 md:order-1">
-              © 2026 EDUVERSE. All rights reserved.
+              © 2026 SIKSHASTACK. All rights reserved.
             </div>
 
             {/* "Made with Love" Badge (Removed as requested) */}

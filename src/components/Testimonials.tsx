@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 
 const testimonials = [
   {
-    text: "EDUVERSE revolutionized how I learn. The interactive courses and expert instructors helped me upskill quickly for my new tech role.",
+    text: "SikshaStack revolutionized how I learn. The interactive courses and expert instructors helped me upskill quickly for my new tech role.",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100",
     name: "Briana Patton",
     role: "Student",
@@ -27,7 +27,7 @@ const testimonials = [
     role: "Online Student",
   },
   {
-    text: "EDUVERSE's robust curriculum and flexible schedule allowed me to balance my job while completing my certification effortlessly.",
+    text: "SikshaStack's robust curriculum and flexible schedule allowed me to balance my job while completing my certification effortlessly.",
     image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=100",
     name: "Zainab Hussain",
     role: "Working Professional",
@@ -51,7 +51,7 @@ const testimonials = [
     role: "HR Manager",
   },
   {
-    text: "I've tried many online courses, but EDUVERSE stands out for its amazing UI and high-quality educational resources.",
+    text: "I've tried many online courses, but SikshaStack stands out for its amazing UI and high-quality educational resources.",
     image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100",
     name: "Hassan Ali",
     role: "Freelance Designer",
@@ -81,7 +81,7 @@ export default function Testimonials() {
             What Our Learners Say
           </h2>
           <p className="text-center mt-5 opacity-75">
-            Discover how EDUVERSE is transforming the learning experience for students and professionals.
+            Discover how SikshaStack is transforming the learning experience for students and professionals.
           </p>
         </motion.div>
 
